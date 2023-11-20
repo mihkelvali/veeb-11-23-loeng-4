@@ -1,47 +1,52 @@
 import { useState } from 'react';
+import { v4 } from 'uuid';
 
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
+import Typography from '@mui/material/Typography';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 
 import './App.css';
 
-/*
-{
-  text: 'pese hambad',
-  isChecked: false,
-  id: 0,
-  isDeleted: false
-}
-*/
-
 function App() {
-  const [todoIdCounter, setTodoIdCounter] = useState(0);
   const [inputValue, setInputValue] = useState('');
   const [todos, setTodos] = useState([
     {
       text: 'pese hambad',
       isChecked: false,
-      id: 0
+      id: v4()
     }
   ]);
 
-
-
   const addNewTodo = () => {
+    if (inputValue === '') return;
     setTodos((currentTodos) => [
       ...currentTodos,
       {
         text: inputValue,
         isChecked: false,
-        isDeleted: false,
-        id: todos.length
+        id: v4()
       }
     ]);
     setInputValue('');
-    console.log(todos);
+  }
+
+  const toggleTodoChecked = (id) => {
+    const newTodosList = todos.map((todo) => {
+      if (todo.id === id) {
+        todo.isChecked = !todo.isChecked;
+      }
+      return todo;
+    });
+    setTodos(newTodosList);
+  }
+
+  const deleteTodo = (id) => {
+    const newTodosList = todos.filter((todo) => todo.id !== id);
+    setTodos(newTodosList);
   }
 
   const handleInputChange = (event) => {
@@ -74,14 +79,26 @@ function App() {
             />
             <Button variant="outlined" onClick={addNewTodo}>Add</Button>
           </Stack>
-          {/* todo list */}
           {
             todos.map((todo) => (
-              !todo.isDeleted ? (
-                <div key={todo.id}>
-                  <Checkbox checked={todo.isChecked} /> {todo.text} <a>x</a>
-                </div>
-              ) : null
+              <div key={todo.id} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+                <Checkbox
+                  checked={todo.isChecked}
+                  onClick={() => toggleTodoChecked(todo.id)}
+                />
+                <Typography
+                  variant="span"
+                  sx={{
+                    textDecoration: todo.isChecked ? 'line-through' : 'none',
+                    alignSelf: 'baseline'
+                  }}>
+                  {todo.text}
+                </Typography>
+                <DeleteIcon
+                  onClick={() => deleteTodo(todo.id)}
+                  sx={{ cursor: 'pointer' }}
+                />
+              </div>
             ))
           }
         </Box>
